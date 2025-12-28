@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Location Scraper</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --border: #e5e5e5;
+            --text: #1a1a1a;
+            --text-dim: #666666;
+            --accent: #2563eb;
+            --accent-light: #dbeafe;
+            --error: #dc2626;
+            --error-light: #fee2e2;
+            --success: #16a34a;
+            --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 3rem 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-bottom: 3rem;
+            font-size: 1rem;
+        }
+
+        .form-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group:last-of-type {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        input::placeholder {
+            color: #999;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--sans);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        .error {
+            background: var(--error-light);
+            border: 1px solid var(--error);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 2rem;
+            color: var(--error);
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .results-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .results-count {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .result-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .result-detail {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .result-detail:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: var(--text);
+            margin-right: 0.5rem;
+        }
+
+        .result-detail a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .result-detail a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .divider {
+            margin: 4rem 0;
+            padding-top: 4rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Business Scraper</h1>
+        <p class="subtitle">Extract business data from Google Maps</p>
+
+        <div class="form-section">
+            <form id="scraperForm">
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input 
+                        type="text" 
+                        id="location" 
+                        name="location" 
+                        placeholder="e.g., Boston, USA"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="industry">Business Segment</label>
+                    <input 
+                        type="text" 
+                        id="industry" 
+                        name="industry" 
+                        placeholder="e.g., Education"
+                    >
+                </div>
+
+                <button type="submit" id="submitBtn">
+                    Run Scraper
+                </button>
+            </form>
+        </div>
+
+        <div class="error" id="errorMessage"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Scraping data... This may take a moment.</p>
+        </div>
+
+        <div class="results" id="results">
+            <h2 class="results-header">Results</h2>
+            <p class="results-count" id="resultsCount"></p>
+            <div id="resultsList"></div>
+        </div>
+
+        <!-- Exa Search Section -->
+        <div class="divider">
+            <h1>People Search</h1>
+            <p class="subtitle">Find people and their LinkedIn profiles</p>
+
+            <div class="form-section">
+                <form id="exaForm">
+                    <div class="form-group">
+                        <label for="exaQuery">Search Query</label>
+                        <input 
+                            type="text" 
+                            id="exaQuery" 
+                            name="exaQuery" 
+                            placeholder="e.g., GTM execs at xAI"
+                        >
+                    </div>
+
+                    <button type="submit" id="exaSubmitBtn">
+                        Search People
+                    </button>
+                </form>
+            </div>
+
+            <div class="error" id="exaErrorMessage"></div>
+
+            <div class="loading" id="exaLoading">
+                <div class="spinner"></div>
+                <p>Searching...</p>
+            </div>
+
+            <div class="results" id="exaResults">
+                <h2 class="results-header">People Found</h2>
+                <p class="results-count" id="exaResultsCount"></p>
+                <div id="exaResultsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = '/.netlify/functions/apify-scraper';
+
+        const form = document.getElementById('scraperForm');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultsCount = document.getElementById('resultsCount');
+        const resultsList = document.getElementById('resultsList');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const location = document.getElementById('location').value;
+            const industry = document.getElementById('industry').value;
+
+            // Hide previous results/errors
+            results.classList.remove('active');
+            errorMessage.classList.remove('active');
+
+            // Show loading
+            loading.classList.add('active');
+            submitBtn.disabled = true;
+
+            const payload = {
+                "includeWebResults": false,
+                "language": "en",
+                "locationQuery": location,
+                "maxCrawledPlacesPerSearch": 1,
+                "maxImages": 0,
+                "maximumLeadsEnrichmentRecords": 0,
+                "scrapeContacts": false,
+                "scrapeDirectories": false,
+                "scrapeImageAuthors": false,
+                "scrapePlaceDetailPage": false,
+                "scrapeReviewsPersonalData": true,
+                "scrapeSocialMediaProfiles": {
+                    "facebooks": false,
+                    "instagrams": false,
+                    "tiktoks": false,
+                    "twitters": false,
+                    "youtubes": false
+                },
+                "scrapeTableReservationProvider": false,
+                "searchStringsArray": [industry],
+                "skipClosedPlaces": false
+            };
+
+            try {
+                // This endpoint returns dataset items directly
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+
+                const items = await response.json();
+                console.log('Items:', items);
+
+                displayResults(items);
+
+            } catch (error) {
+                console.error('Full error:', error);
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.classList.add('active');
+            } finally {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
+
+        function displayResults(items) {
+            resultsList.innerHTML = '';
+
+            // Items should be an array directly from the dataset
+            if (!Array.isArray(items)) {
+                errorMessage.textContent = 'Unexpected response format';
+                errorMessage.classList.add('active');
+                return;
+            }
+
+            if (items.length === 0) {
+                resultsCount.textContent = 'No results found';
+                results.classList.add('active');
+                return;
+            }
+
+            resultsCount.textContent = `Found ${items.length} ${items.length === 1 ? 'result' : 'results'}`;
+
+            items.forEach(item => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+
+                let html = '';
+
+                if (item.title || item.name) {
+                    html += `<div class="result-name">${item.title || item.name}</div>`;
+                }
+
+                if (item.address) {
+                    html += `<div class="result-detail"><span class="result-label">Address:</span>${item.address}</div>`;
+                }
+
+                if (item.categoryName) {
+                    html += `<div class="result-detail"><span class="result-label">Category:</span>${item.categoryName}</div>`;
+                }
+
+                if (item.phone) {
+                    html += `<div class="result-detail"><span class="result-label">Phone:</span>${item.phone}</div>`;
+                }
+
+                if (item.url) {
+                    html += `<div class="result-detail"><span class="result-label">URL:</span><a href="${item.url}" target="_blank">${item.url}</a></div>`;
+                }
+
+                if (item.website) {
+                    html += `<div class="result-detail"><span class="result-label">Website:</span><a href="${item.website}" target="_blank">${item.website}</a></div>`;
+                }
+
+                if (item.totalScore !== undefined) {
+                    html += `<div class="result-detail"><span class="result-label">Rating:</span>${item.totalScore}</div>`;
+                }
+
+                if (item.reviewsCount !== undefined) {
+                    html += `<div class="result-detail"><span class="result-label">Reviews:</span>${item.reviewsCount}</div>`;
+                }
+
+                resultItem.innerHTML = html;
+                resultsList.appendChild(resultItem);
+            });
+
+            results.classList.add('active');
+        }
+
+        // Exa API Search Handler (via Netlify Function)
+        // When deployed, change this to: 'https://your-site-name.netlify.app/.netlify/functions/exa-search'
+        const EXA_PROXY_ENDPOINT = '/.netlify/functions/exa-search';
+
+        const exaForm = document.getElementById('exaForm');
+        const exaLoading = document.getElementById('exaLoading');
+        const exaResults = document.getElementById('exaResults');
+        const exaErrorMessage = document.getElementById('exaErrorMessage');
+        const exaSubmitBtn = document.getElementById('exaSubmitBtn');
+        const exaResultsCount = document.getElementById('exaResultsCount');
+        const exaResultsList = document.getElementById('exaResultsList');
+
+        exaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const query = document.getElementById('exaQuery').value;
+
+            // Hide previous results/errors
+            exaResults.classList.remove('active');
+            exaErrorMessage.classList.remove('active');
+
+            // Show loading
+            exaLoading.classList.add('active');
+            exaSubmitBtn.disabled = true;
+
+            const payload = {
+                "query": query
+            };
+
+            try {
+                const response = await fetch(EXA_PROXY_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                }).catch(err => {
+                    console.error('Fetch error:', err);
+                    throw new Error('Cannot connect to Netlify function. Make sure the site is deployed or test locally with Netlify CLI.');
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API error response:', errorText);
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Exa data:', data);
+
+                displayExaResults(data.results || []);
+
+            } catch (error) {
+                console.error('Exa error:', error);
+                exaErrorMessage.textContent = `Error: ${error.message}`;
+                exaErrorMessage.classList.add('active');
+            } finally {
+                exaLoading.classList.remove('active');
+                exaSubmitBtn.disabled = false;
+            }
+        });
+
+        function displayExaResults(items) {
+            exaResultsList.innerHTML = '';
+
+            if (!Array.isArray(items) || items.length === 0) {
+                exaResultsCount.textContent = 'No results found';
+                exaResults.classList.add('active');
+                return;
+            }
+
+            exaResultsCount.textContent = `Found ${items.length} ${items.length === 1 ? 'person' : 'people'}`;
+
+            items.forEach(item => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+
+                let html = '';
+
+                if (item.title) {
+                    html += `<div class="result-name">${item.title}</div>`;
+                }
+
+                if (item.url) {
+                    html += `<div class="result-detail"><span class="result-label">LinkedIn:</span><a href="${item.url}" target="_blank">${item.url}</a></div>`;
+                }
+
+                if (item.text) {
+                    html += `<div class="result-detail"><span class="result-label">Description:</span>${item.text.substring(0, 200)}${item.text.length > 200 ? '...' : ''}</div>`;
+                }
+
+                resultItem.innerHTML = html;
+                exaResultsList.appendChild(resultItem);
+            });
+
+            exaResults.classList.add('active');
+        }
+    </script>
+</body>
+</html>

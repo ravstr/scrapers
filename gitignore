@@ -1,0 +1,17 @@
+# Environment variables
+.env
+.env.local
+
+# Secrets - DO NOT COMMIT
+SECRETS.txt
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Netlify
+.netlify/
+
+# OS files
+.DS_Store
+Thumbs.db
