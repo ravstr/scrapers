@@ -1,0 +1,21 @@
+[build]
+  # No build command needed for static site
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Function configuration
+[functions]
+  # Functions are in netlify/functions/ directory
+  directory = "netlify/functions"
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+

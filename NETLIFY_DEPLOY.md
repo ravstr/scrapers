@@ -6,11 +6,15 @@ This application combines Google Maps business scraping (via Apify) with people 
 
 ```
 your-project/
-├── index.html              # Main application (rename from apify-scraper.html)
-├── netlify.toml           # Netlify configuration
-├── package.json           # Node.js dependencies
-└── netlify-functions/     # Serverless functions
-    └── exa-search.js      # Exa API proxy function
+├── index.html                    # Main application
+├── netlify.toml                  # Netlify configuration
+├── package.json                  # Node.js dependencies
+├── .gitignore                    # Git ignore file
+├── env.example                   # Example environment variables
+└── netlify/
+    └── functions/                # Serverless functions
+        ├── apify-scraper.js      # Apify API proxy function
+        └── exa-search.js         # Exa API proxy function
 ```
 
 ## Deployment Steps
@@ -20,10 +24,12 @@ your-project/
 1. **Create a new Git repository** (GitHub, GitLab, or Bitbucket)
    
 2. **Add these files to your repository:**
-   - `index.html` (rename `apify-scraper.html` to `index.html`)
+   - `index.html`
    - `netlify.toml`
    - `package.json`
-   - `netlify-functions/exa-search.js`
+   - `.gitignore`
+   - `netlify/functions/apify-scraper.js`
+   - `netlify/functions/exa-search.js`
 
 3. **Push to your Git repository:**
    ```bash
@@ -86,11 +92,15 @@ your-project/
 
 ## Configuration
 
-### Update the HTML (if needed)
+### Function Paths
 
-The HTML is already configured to use relative paths (`/.netlify/functions/exa-search`), which works for both:
-- Local testing with Netlify CLI: `http://localhost:8888/.netlify/functions/exa-search`
-- Production: `https://your-site-name.netlify.app/.netlify/functions/exa-search`
+The HTML is already configured to use the correct paths:
+- `/.netlify/functions/apify-scraper` for the Apify scraper
+- `/.netlify/functions/exa-search` for the Exa search
+
+These paths work for both:
+- Local testing with Netlify CLI: `http://localhost:8888/.netlify/functions/[function-name]`
+- Production: `https://your-site-name.netlify.app/.netlify/functions/[function-name]`
 
 No changes needed! ✅
 
